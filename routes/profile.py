@@ -1,11 +1,9 @@
 import os
-from datetime import datetime, time
 from flask import Blueprint, request, jsonify, send_from_directory, current_app, url_for
 from flask_pydantic import validate
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from marshmallow import ValidationError
 from werkzeug.utils import secure_filename
-from openai_client import get_meal_plan
 from models import db, Meal, UserProfile, User
 from schemas import *
 
@@ -22,10 +20,10 @@ def upload_user_photo():
     user_id = get_jwt_identity()
     user = User.query.get_or_404(user_id)
 
-    if 'photo' not in request.files:
+    if 'file' not in request.files:
         return jsonify({"error": "Файл не найден"}), 400
 
-    file = request.files['photo']
+    file = request.files['file']
     if file.filename == '':
         return jsonify({"error": "Файл не выбран"}), 400
 
@@ -44,12 +42,12 @@ def upload_user_photo():
         db.session.commit()
 
         return jsonify({
-            "message": "Фотография успешно загружена",
-            "photo_url": url_for('user.get_photo', filename=unique_filename, _external=True)
+            "photo_url": url_for('profile.get_photo', filename=unique_filename, _external=True)
         }), 200
 
     except Exception as e:
         db.session.rollback()
+        print(e)
         return jsonify({"error": str(e)}), 500
 
 
@@ -70,7 +68,7 @@ def get_user_data():
     return jsonify({
         'user': {
             **UserSchema.model_validate(user).model_dump(),
-            'photo_url': url_for('user.get_photo', filename=user.photo_url, _external=True) if user.photo_url else None
+            'photo_url': url_for('profile.get_photo', filename=user.photo_url, _external=True) if user.photo_url else None
         },
         'profile': UserProfileSchema.model_validate(profile).model_dump()
     }), 200

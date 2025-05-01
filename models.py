@@ -1,7 +1,7 @@
 from datetime import datetime, time
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
-
+from sqlalchemy.sql import expression
 from openai_client import get_meal_plan
 
 db = SQLAlchemy()
@@ -65,6 +65,8 @@ class Meal(db.Model):
     date = db.Column(db.Date, nullable=False)
     time = db.Column(db.Time, nullable=False)
     products = db.relationship('Product', backref='meal', lazy=True)
+    completed = db.Column(db.Boolean, default=False,
+                          server_default=expression.false())
 
     @property
     def total_nutrients(self):
@@ -114,7 +116,6 @@ class Product(db.Model):
     proteins = db.Column(db.Integer, nullable=False)
     fats = db.Column(db.Integer, nullable=False)
     carbs = db.Column(db.Integer, nullable=False)
-    completed = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
         return f'<Product {self.name}>'

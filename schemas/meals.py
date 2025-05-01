@@ -9,7 +9,6 @@ class ProductSchema(BaseModel):
     proteins: int
     fats: int
     carbs: int
-    completed: bool
 
     class Config:
         from_attributes = True
@@ -21,6 +20,7 @@ class MealSchema(BaseModel):
     date: Date
     time: Time
     products: list[ProductSchema]
+    completed: bool
 
     class Config:
         from_attributes = True
@@ -45,3 +45,7 @@ class MealSchema(BaseModel):
             nutrients['fats'] += product.fats
             nutrients['carbs'] += product.carbs
         return nutrients
+
+
+class ChangeMealStatusSchema(BaseModel):
+    meal_id: int

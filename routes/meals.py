@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from flask import Blueprint, request, jsonify
+from flask_pydantic import validate
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from schemas import *
 from models import *
@@ -48,17 +49,16 @@ def get_meals():
         return jsonify({'error': str(e)}), 500
 
 
-@meals_bp.route('change_product_status/', methods=['GET'])
+@meals_bp.route('change_meal_status/', methods=['POST'])
 @jwt_required()
-def change_product_status():
+@validate()
+def change_meal_status(body: ChangeMealStatusSchema):
     user_id = get_jwt_identity()
-    product = Product.query.join(Meal).filter(
-        Product.id == request.args.get('product_id'),
-        Meal.user_id == user_id
-    ).first()
-    if not product:
-        return jsonify({'error': 'Продукт не найден'}), 404
+    meal_id = body.model_dump()["meal_id"]
+    meal = Meal.query.filter(Meal.id == meal_id, user_id == user_id).first()
+    if not meal:
+        return jsonify({'error': 'Прием пищи не найден'}), 404
 
-    product.completed = not product.completed
+    meal.completed = not meal.completed
     db.session.commit()
-    return jsonify({'message': 'Статус продукта изменен'}), 200
+    return jsonify({'message': 'ok'}), 200
