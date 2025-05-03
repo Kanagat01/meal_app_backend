@@ -79,11 +79,7 @@ def get_user_data():
 @validate()
 def set_user_profile(body: UserProfileSchema):
     current_user_id = get_jwt_identity()
-    try:
-        data = body.model_dump()
-    except ValidationError as err:
-        return jsonify({"error": err.errors()}), 400
-
+    data = body.model_dump()
     existing_profile = UserProfile.query.filter_by(
         user_id=current_user_id).first()
     if existing_profile:

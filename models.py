@@ -26,7 +26,7 @@ class User(db.Model):
 class Token(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, nullable=False)
-    jti = db.Column(db.String(36), unique=True, nullable=False)
+    jti = db.Column(db.Text, unique=True, nullable=False)
     token_type = db.Column(db.String(10))  # access/refresh
     revoked = db.Column(db.Boolean, default=False)
 
@@ -65,8 +65,7 @@ class Meal(db.Model):
     date = db.Column(db.Date, nullable=False)
     time = db.Column(db.Time, nullable=False)
     products = db.relationship('Product', backref='meal', lazy=True)
-    completed = db.Column(db.Boolean, default=False,
-                          server_default=expression.false())
+    completed = db.Column(db.Boolean, default=False)
 
     @property
     def total_nutrients(self):
